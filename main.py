@@ -1,4 +1,5 @@
 import Lexer
+import Parser
 # This is a sample Python script.
 
 # Press Shift+F10 to execute it or replace it with your code.
@@ -7,5 +8,6 @@ import Lexer
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     Lexer.join('test.txt')
+    test = Parser.Node("lang")
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
