@@ -23,7 +23,6 @@ def join(file):
     data = open(file).read().replace('\n', ' ')
     tokens = lexer_start(data)
     print(tokens)
-    #print(Parser.parse_AST(tokens))
 
 
 def lexer_start(input_string):

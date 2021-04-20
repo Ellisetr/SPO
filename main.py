@@ -6,6 +6,6 @@ import Lexer
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    Lexer.Lexer("a = 5")
+    Lexer.join('test.txt')
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
