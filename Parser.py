@@ -43,3 +43,7 @@ class Node:
 
     def getParent(self):
         return self.parent
+
+
+def validator(tokens):
+    print('test')

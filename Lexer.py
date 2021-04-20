@@ -26,13 +26,13 @@ def join(file):
 
 
 def lexer_start(input_string):
-    lexemes = []
+    tokens = []
     while len(input_string) > 0:
-        buff = lexer(input_string)[:2]
-        if buff[0] != 'WS':
-            lexemes.append(buff)
-        input_string = input_string[lexer(input_string)[3]:]
-    return lexemes
+        buffer = lexer(input_string)
+        input_string = input_string[len(buffer[1]):]
+        if buffer[0] != 'WS':
+            tokens.append(buffer[:2])
+    return tokens
 
 
 def lexer(input_string):
@@ -53,5 +53,5 @@ def matcher(buffer):
     for terminal in terminals:
         match = re.fullmatch(terminal[1], buffer)
         if match is not None:
-            matches.append((terminal[0], match.string, terminal[2], match.endpos))
+            matches.append((terminal[0], match.string, terminal[2]))
     return matches
