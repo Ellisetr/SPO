@@ -7,6 +7,7 @@ import Parser
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    print(open('test.txt').read())
     tokens = Lexer.join('test.txt')
     Parser.AST(tokens)
 

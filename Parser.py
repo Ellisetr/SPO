@@ -51,7 +51,8 @@ class Node:
 
 def lang():
     node = Node('lang')
-    node.addNode(expr())
+    while len(token_list) > 0:
+        node.addNode(expr())
     return node
 
 
@@ -63,6 +64,8 @@ def expr():
         node.addNode(if_expr())
     elif token_list[0][0] == 'while_KW':
         node.addNode(while_expr())
+    elif token_list[0][0] == 'do_KW':
+        node.addNode(do_while_expr())
     return node
 
 
@@ -138,7 +141,7 @@ def value_expr():
         node.addNode(match('OP'))
         node.addNode(value_expr())
     except Exception:
-        print('lol')
+        None
 
     if (err == 'Error Found'):
         raise Exception('Error')
@@ -161,6 +164,20 @@ def logical_expr():
     node.addNode(value())
     return node
 
+def do_while_expr():
+    node = Node('do_while_expr')
+    node.addNode(match('do_KW'))
+    node.addNode(do_while_body())
+    return node
+
+def do_while_body():
+    node = Node('do_while_body')
+    node.addNode(body(''))
+    node.addNode(match('while_KW'))
+    node.addNode(match('L_BR'))
+    node.addNode(logical_expr())
+    node.addNode(match('R_BR'))
+    return node
 
 def value():
     node = Node('VALUE')

@@ -1,5 +1,5 @@
 if (x>5) {c = (5-2)*2} else {b = b+1}
-do while (a>0) {
+do {
     x = x+1
-}
-a = -5
+} while (a>0)
+a = 5
