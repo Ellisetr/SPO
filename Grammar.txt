@@ -25,7 +25,7 @@ logical_expression -> value (LOGICAL_OP value)*
 
 body -> L_S_BR expr+ R_S_BR
 
-while_expr -> while_head while_body
+while_expr -> while_head body
 while_head -> while_KW logical_expression
 while_body -> L_S_BR expr+ R_S_BR
 

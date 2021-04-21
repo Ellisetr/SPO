@@ -74,7 +74,7 @@ def expr():
 def if_expr():
     node = Node('if_expr')
     node.addNode(if_head())
-    node.addNode(body('if_KW'))
+    node.addNode(body('if_body'))
     try:
         node.addNode(match('else_KW'))
         node.addNode(body('else_KW'))
