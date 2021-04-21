@@ -26,7 +26,7 @@ assign_expr -> VAR ASSIGN_OP value_expr*
 value_expr -> (value_expr_brackets | value) (OP value_expr)?
 value_expr_brackets -> L_BR value_expr R_BR
 """""
-token_list = [[],[]]
+token_list = [[], []]
 
 
 class Node:
@@ -59,14 +59,15 @@ def lang():
 def expr():
     node = Node('expr')
     if token_list[0][0] == 'VAR':
-        node.addNode(assign_expr())
+         node.addNode(assign_expr())
     elif token_list[0][0] == 'if_KW':
-        node.addNode(if_expr())
+         node.addNode(if_expr())
     elif token_list[0][0] == 'while_KW':
         node.addNode(while_expr())
     elif token_list[0][0] == 'do_KW':
         node.addNode(do_while_expr())
     return node
+
 
 
 # IF_EXPR
@@ -78,7 +79,7 @@ def if_expr():
         node.addNode(match('else_KW'))
         node.addNode(body('else_KW'))
     except Exception:
-        print('Error')
+        print('No else found')
     return node
 
 
@@ -107,13 +108,25 @@ def body(KW):
     node = Node(KW)
     node.addNode(match('L_S_BR'))
     node.addNode(expr())
+    while re.match('(VAR)|(if_KW)|(while_KW)', token_list[0][0]):
+        node.addNode(expr())
     node.addNode(match('R_S_BR'))
     return node
 
 # WHILE_EXPR
 def while_expr():
-    None
+    node = Node('while_expr')
+    node.addNode(while_head())
+    node.addNode(body('while_body'))
+    return node
 
+def while_head():
+    node = Node('while_head')
+    node.addNode(match('while_KW'))
+    node.addNode(match('L_BR'))
+    node.addNode(logical_expr())
+    node.addNode(match('R_BR'))
+    return node
 
 # ASSIGN_EXPR
 def assign_expr():
@@ -147,6 +160,7 @@ def value_expr():
         raise Exception('Error')
 
     return node
+
 
 def value_expr_brackets():
     node = Node('value_expr_brackets')
