@@ -7,7 +7,7 @@ import Parser
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    Lexer.join('test.txt')
-    test = Parser.Node("lang")
+    tokens = Lexer.join('test.txt')
+    Parser.AST(tokens)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

@@ -17,14 +17,13 @@ expr -> assign_expr | if_expr | while_expr | do_while_expr
 
 value -> NUMBER | VAR
 
-if_expr -> if_head if_body (else_head else_body)?
+if_expr -> if_head body (else_KW body)?
 if_head -> if_KW if_condition
 if_condition -> L_BR logical_expression R_RB
 
 logical_expression -> value (LOGICAL_OP value)*
 
-if_body -> L_S_BR expr+ R_S_BR
-else_body -> L_S_BR expr+ R_S_BR
+body -> L_S_BR expr+ R_S_BR
 
 while_expr -> while_head while_body
 while_head -> while_KW logical_expression
