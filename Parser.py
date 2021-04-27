@@ -1,28 +1,30 @@
 import re
 import Lexer
+
 """""""""
 lang -> expr+
 expr -> assign_expr | if_expr | while_expr | do_while_expr
 
 value -> NUMBER | VAR
 
-if_expr -> if_head if_body (else_head else_body)?
+if_expr -> if_head if_body (else_KW body)?
 if_head -> if_KW if_condition
-if_condition -> L_BR logical_expr R_RB
-
-logical_expr -> value (LOGICAL_OP value)*
-
+if_condition -> L_BR logical_expression R_RB
 if_body -> L_S_BR expr+ R_S_BR
-else_body -> L_S_BR expr+ R_S_BR
+
+logical_expression -> value (LOGICAL_OP value)*
+
 
 while_expr -> while_head while_body
 while_head -> while_KW logical_expression
 while_body -> L_S_BR expr+ R_S_BR
 
 do_while_expr -> do_KW do_while_body
-do_while_body -> L_S_BR expr+ R_S_BR while_kw logical_expr
+do_while_body -> while_body while_kw logical_expression
 
 assign_expr -> VAR ASSIGN_OP value_expr*
+
+
 value_expr -> (value_expr_brackets | value) (OP value_expr)?
 value_expr_brackets -> L_BR value_expr R_BR
 """""
@@ -48,7 +50,6 @@ class Node:
         return self.param
 
 
-
 def lang():
     node = Node('lang')
     while len(token_list) > 0:
@@ -59,15 +60,16 @@ def lang():
 def expr():
     node = Node('expr')
     if token_list[0][0] == 'VAR':
-         node.addNode(assign_expr())
+        node.addNode(assign_expr())
     elif token_list[0][0] == 'if_KW':
-         node.addNode(if_expr())
+        node.addNode(if_expr())
     elif token_list[0][0] == 'while_KW':
         node.addNode(while_expr())
     elif token_list[0][0] == 'do_KW':
         node.addNode(do_while_expr())
+    else:
+        raise Exception
     return node
-
 
 
 # IF_EXPR
@@ -97,21 +99,15 @@ def if_condition():
     node.addNode(match('R_BR'))
     return node
 
+
 def match(input_str):
     node = Node(token_list[0])
-    if (input_str == token_list[0][0]):
+    if input_str == token_list[0][0]:
         token_list.pop(0)
         return node
-    else: raise Exception('Unknown symbol' + token_list[0][0])
+    else:
+        raise Exception('Unknown symbol' + token_list[0][0])
 
-def body(KW):
-    node = Node(KW)
-    node.addNode(match('L_S_BR'))
-    node.addNode(expr())
-    while re.match('(VAR)|(if_KW)|(while_KW)', token_list[0][0]):
-        node.addNode(expr())
-    node.addNode(match('R_S_BR'))
-    return node
 
 # WHILE_EXPR
 def while_expr():
@@ -120,6 +116,7 @@ def while_expr():
     node.addNode(body('while_body'))
     return node
 
+
 def while_head():
     node = Node('while_head')
     node.addNode(match('while_KW'))
@@ -127,6 +124,7 @@ def while_head():
     node.addNode(logical_expr())
     node.addNode(match('R_BR'))
     return node
+
 
 # ASSIGN_EXPR
 def assign_expr():
@@ -143,7 +141,7 @@ def value_expr():
     try:
         node.addNode(value_expr_brackets())
     except Exception:
-        err= err+'Error'
+        err = 'Error'
 
     try:
         node.addNode(value())
@@ -156,7 +154,7 @@ def value_expr():
     except Exception:
         None
 
-    if (err == 'Error Found'):
+    if err == 'Error Found':
         raise Exception('Error')
 
     return node
@@ -178,11 +176,14 @@ def logical_expr():
     node.addNode(value())
     return node
 
+
+# DO_WHILE_EXPR
 def do_while_expr():
     node = Node('do_while_expr')
     node.addNode(match('do_KW'))
     node.addNode(do_while_body())
     return node
+
 
 def do_while_body():
     node = Node('do_while_body')
@@ -193,6 +194,8 @@ def do_while_body():
     node.addNode(match('R_BR'))
     return node
 
+
+# VALUE -> VAR | NUMBER
 def value():
     node = Node('VALUE')
     if token_list[0][0] == 'NUMBER':
@@ -201,10 +204,21 @@ def value():
     elif token_list[0][0] == 'VAR':
         node.addNode(match('VAR'))
         return node
-    else: raise Exception('Unknown symbol' + token_list[0][0])
+    else:
+        raise Exception('Unknown symbol' + token_list[0][0])
 
 
-def AST(tokens):
+def body(KW):
+    node = Node(KW)
+    node.addNode(match('L_S_BR'))
+    node.addNode(expr())
+    while re.match('(VAR)|(if_KW)|(while_KW)|(do_KW)', token_list[0][0]):
+        node.addNode(expr())
+    node.addNode(match('R_S_BR'))
+    return node
+
+
+def Parser(tokens):
     global token_list
     token_list = tokens
     root = lang()
@@ -212,14 +226,29 @@ def AST(tokens):
     printAST(root, 0)
 
 
-def parser():
-    None
-
+# AST PRINT
 def printAST(tree, level):
     tab = ''
-    for i in range (level):
-        tab = tab+'     '
+    for i in range(level):
+        tab = tab + '     '
     print(tab, tree.getParam())
 
     for l in tree.getNodes():
-        printAST(l, level+1)
+        printAST(l, level + 1)
+
+"""""""""
+# DEBUG PRINT
+def printTokens(tree, level):
+    tab = ''
+    if isinstance(tree.getParam(), tuple):
+        for i in range(level):
+            tab = tab + '     '
+        print(tab, tree.getParam())
+
+    if len(tree.getNodes()) == 1:
+        for l in tree.getNodes():
+            printTokens(l, level)
+    else:
+        for l in tree.getNodes():
+            printTokens(l, level + 1)
+"""""""""
