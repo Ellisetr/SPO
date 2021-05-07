@@ -1,3 +1,4 @@
+import copy
 import re
 import Lexer
 
@@ -28,7 +29,6 @@ assign_expr -> VAR ASSIGN_OP value_expr*
 value_expr -> (value_expr_brackets | value) (OP value_expr)?
 value_expr_brackets -> L_BR value_expr R_BR
 """""
-token_list = [[], []]
 
 
 class Node:
@@ -50,205 +50,192 @@ class Node:
         return self.param
 
 
-def lang():
-    node = Node('lang')
-    while len(token_list) > 0:
-        node.addNode(expr())
-    return node
+class Parser:
+    def __init__(self, token_list):
+        self.token_list = self.token_list = copy.deepcopy(token_list)
+        self.root = ''
 
+    def startParser(self):
+        self.root = self.lang()
+        AST(self.root, 0)
+        self.printTokens(self.root, 0)
 
-def expr():
-    node = Node('expr')
-    if token_list[0][0] == 'VAR':
-        node.addNode(assign_expr())
-    elif token_list[0][0] == 'if_KW':
-        node.addNode(if_expr())
-    elif token_list[0][0] == 'while_KW':
-        node.addNode(while_expr())
-    elif token_list[0][0] == 'do_KW':
-        node.addNode(do_while_expr())
-    else:
-        raise Exception
-    return node
+    def getTokens(self):
+        return self.token_list
 
+    def getTree(self):
+        return copy.deepcopy(self.root)
 
-# IF_EXPR
-def if_expr():
-    node = Node('if_expr')
-    node.addNode(if_head())
-    node.addNode(body('if_body'))
-    try:
-        node.addNode(match('else_KW'))
-        node.addNode(body('else_KW'))
-    except Exception:
-        print('No else found')
-    return node
-
-
-def if_head():
-    node = Node('if_head')
-    node.addNode(match('if_KW'))
-    node.addNode(if_condition())
-    return node
-
-
-def if_condition():
-    node = Node('if_condition')
-    node.addNode(match('L_BR'))
-    node.addNode(logical_expr())
-    node.addNode(match('R_BR'))
-    return node
-
-
-def match(input_str):
-    node = Node(token_list[0])
-    if input_str == token_list[0][0]:
-        token_list.pop(0)
+    def lang(self):
+        node = Node('lang')
+        while len(self.token_list) > 0:
+            node.addNode(self.expr())
         return node
-    else:
-        raise Exception('Unknown symbol' + token_list[0][0])
 
-
-# WHILE_EXPR
-def while_expr():
-    node = Node('while_expr')
-    node.addNode(while_head())
-    node.addNode(body('while_body'))
-    return node
-
-
-def while_head():
-    node = Node('while_head')
-    node.addNode(match('while_KW'))
-    node.addNode(match('L_BR'))
-    node.addNode(logical_expr())
-    node.addNode(match('R_BR'))
-    return node
-
-
-# ASSIGN_EXPR
-def assign_expr():
-    node = Node('assign_expr')
-    node.addNode(match('VAR'))
-    node.addNode(match('ASSIGN_OP'))
-    node.addNode(value_expr())
-    return node
-
-
-def value_expr():
-    node = Node('value_expr')
-    err = ''
-    try:
-        node.addNode(value_expr_brackets())
-    except Exception:
-        err = 'Error'
-
-    try:
-        node.addNode(value())
-    except Exception:
-        err = err + ' Found'
-
-    try:
-        node.addNode(match('OP'))
-        node.addNode(value_expr())
-    except Exception:
-        None
-
-    if err == 'Error Found':
-        raise Exception('Error')
-
-    return node
-
-
-def value_expr_brackets():
-    node = Node('value_expr_brackets')
-    node.addNode(match('L_BR'))
-    node.addNode(value_expr())
-    node.addNode(match('R_BR'))
-    return node
-
-
-# LOGICAL_EXPR
-def logical_expr():
-    node = Node('logical_expr')
-    node.addNode(value())
-    node.addNode(match('LOGICAL_OP'))
-    node.addNode(value())
-    return node
-
-
-# DO_WHILE_EXPR
-def do_while_expr():
-    node = Node('do_while_expr')
-    node.addNode(match('do_KW'))
-    node.addNode(do_while_body())
-    return node
-
-
-def do_while_body():
-    node = Node('do_while_body')
-    node.addNode(body(''))
-    node.addNode(match('while_KW'))
-    node.addNode(match('L_BR'))
-    node.addNode(logical_expr())
-    node.addNode(match('R_BR'))
-    return node
-
-
-# VALUE -> VAR | NUMBER
-def value():
-    node = Node('VALUE')
-    if token_list[0][0] == 'NUMBER':
-        node.addNode(match('NUMBER'))
+    def expr(self):
+        node = Node('expr')
+        if self.token_list[0][0] == 'VAR':
+            node.addNode(self.assign_expr())
+        elif self.token_list[0][0] == 'if_KW':
+            node.addNode(self.if_expr())
+        elif self.token_list[0][0] == 'while_KW':
+            node.addNode(self.while_expr())
+        elif self.token_list[0][0] == 'do_KW':
+            node.addNode(self.do_while_expr())
+        else:
+            raise Exception
         return node
-    elif token_list[0][0] == 'VAR':
-        node.addNode(match('VAR'))
+
+    # IF_EXPR
+    def if_expr(self):
+        node = Node('if_expr')
+        node.addNode(self.if_head())
+        node.addNode(self.body('if_body'))
+        try:
+            node.addNode(self.match('else_KW'))
+            node.addNode(self.body('else_KW'))
+        except Exception:
+            None
         return node
-    else:
-        raise Exception('Unknown symbol' + token_list[0][0])
 
+    def if_head(self):
+        node = Node('if_head')
+        node.addNode(self.match('if_KW'))
+        node.addNode(self.if_condition())
+        return node
 
-def body(KW):
-    node = Node(KW)
-    node.addNode(match('L_S_BR'))
-    node.addNode(expr())
-    while re.match('(VAR)|(if_KW)|(while_KW)|(do_KW)', token_list[0][0]):
-        node.addNode(expr())
-    node.addNode(match('R_S_BR'))
-    return node
+    def if_condition(self):
+        node = Node('if_condition')
+        node.addNode(self.match('L_BR'))
+        node.addNode(self.logical_expr())
+        node.addNode(self.match('R_BR'))
+        return node
 
+    def match(self, input_str):
+        node = Node(self.token_list[0])
+        if input_str == self.token_list[0][0]:
+            self.token_list.pop(0)
+            return node
+        else:
+            raise Exception('Unknown symbol' + self.token_list[0][0])
 
-def Parser(tokens):
-    global token_list
-    token_list = tokens
-    root = lang()
-    print('Print AST')
-    printAST(root, 0)
+    # WHILE_EXPR
+    def while_expr(self):
+        node = Node('while_expr')
+        node.addNode(self.while_head())
+        node.addNode(self.body('while_body'))
+        return node
 
+    def while_head(self):
+        node = Node('while_head')
+        node.addNode(self.match('while_KW'))
+        node.addNode(self.match('L_BR'))
+        node.addNode(self.logical_expr())
+        node.addNode(self.match('R_BR'))
+        return node
 
-# AST PRINT
-def printAST(tree, level):
+    # ASSIGN_EXPR
+    def assign_expr(self):
+        node = Node('assign_expr')
+        node.addNode(self.match('VAR'))
+        node.addNode(self.match('ASSIGN_OP'))
+        node.addNode(self.value_expr())
+        return node
+
+    def value_expr(self):
+        node = Node('value_expr')
+        err = ''
+        try:
+            node.addNode(self.value_expr_brackets())
+        except Exception:
+            err = 'Error'
+        try:
+            node.addNode(self.value())
+        except Exception:
+            err = err + ' Found'
+        try:
+            node.addNode(self.match('OP'))
+            node.addNode(self.value_expr())
+        except Exception:
+            None
+        if err == 'Error Found':
+            raise Exception('Error')
+        return node
+
+    def value_expr_brackets(self):
+        node = Node('value_expr_brackets')
+        node.addNode(self.match('L_BR'))
+        node.addNode(self.value_expr())
+        node.addNode(self.match('R_BR'))
+        return node
+
+    # LOGICAL_EXPR
+    def logical_expr(self):
+        node = Node('logical_expr')
+        node.addNode(self.value())
+        node.addNode(self.match('LOGICAL_OP'))
+        node.addNode(self.value())
+        return node
+
+    # DO_WHILE_EXPR
+    def do_while_expr(self):
+        node = Node('do_while_expr')
+        node.addNode(self.match('do_KW'))
+        node.addNode(self.do_while_body())
+        return node
+
+    def do_while_body(self):
+        node = Node('do_while_body')
+        node.addNode(self.body(''))
+        node.addNode(self.match('while_KW'))
+        node.addNode(self.match('L_BR'))
+        node.addNode(self.logical_expr())
+        node.addNode(self.match('R_BR'))
+        return node
+
+    # VALUE -> VAR | NUMBER
+    def value(self):
+        node = Node('VALUE')
+        if self.token_list[0][0] == 'NUMBER':
+            node.addNode(self.match('NUMBER'))
+            return node
+        elif self.token_list[0][0] == 'VAR':
+            node.addNode(self.match('VAR'))
+            return node
+        else:
+            raise Exception('Unknown symbol' + self.token_list[0][0])
+
+    def body(self, KW):
+        node = Node(KW)
+        node.addNode(self.match('L_S_BR'))
+        node.addNode(self.expr())
+        while re.match('(VAR)|(if_KW)|(while_KW)|(do_KW)', self.token_list[0][0]):
+            node.addNode(self.expr())
+        node.addNode(self.match('R_S_BR'))
+        return node
+
+    def printTokens(self, tree, level):
+        tab = ''
+        if isinstance(tree.getParam(), tuple):
+            for i in range(level):
+                tab = tab + '     '
+            print(tab, tree.getParam())
+
+        if len(tree.getNodes()) == 1:
+            for l in tree.getNodes():
+                self.printTokens(l, level)
+        else:
+            for l in tree.getNodes():
+                self.printTokens(l, level + 1)
+        # AST PRINT
+
+def AST(tree, level):
     tab = ''
     for i in range(level):
         tab = tab + '     '
     print(tab, tree.getParam())
 
-    for l in tree.getNodes():
-        printAST(l, level + 1)
+    for leaf in tree.getNodes():
+        AST(leaf, level + 1)
 
-"""""""""
-# DEBUG PRINT
-def printTokens(tree, level):
-    tab = ''
-    if isinstance(tree.getParam(), tuple):
-        for i in range(level):
-            tab = tab + '     '
-        print(tab, tree.getParam())
 
-    if len(tree.getNodes()) == 1:
-        for l in tree.getNodes():
-            printTokens(l, level)
-    else:
-        for l in tree.getNodes():
-            printTokens(l, level + 1)
-"""""""""

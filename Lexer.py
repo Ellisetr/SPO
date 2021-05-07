@@ -14,45 +14,47 @@ terminals = \
         ('R_BR', '^\)$', 0),
         ('L_S_BR', '^{$', 0),
         ('R_S_BR', '^}$', 0),
-        ('WS',' ',0),
+        ('WS', ' ', 0),
         ('LOGICAL_OP', '^((and)|(or)|(xor)|(nor)|(==)|(!=)|(>)|(>=)|(<)|(<=))$', 0)
     ]
 
 
-def join(file):
-    data = open(file).read().replace('\n', ' ')
-    tokens = lexer_start(data)
-    print(tokens)
-    return tokens
+class Lexer:
+    def __init__(self, file):
+        print(open(file).read())
+        self.data = open(file).read().replace('\n', ' ')
+        self.tokens = [[], []]
 
+    def startLexer(self):
+        tokens = self.nextLexeme(self.data)
+        print(tokens)
+        return tokens
 
-def lexer_start(input_string):
-    tokens = []
-    while len(input_string) > 0:
-        buffer = lexer(input_string)
-        input_string = input_string[len(buffer[1]):]
-        if buffer[0] != 'WS':
-            tokens.append(buffer[:2])
-    return tokens
+    def nextLexeme(self, input_string):
+        tokens = []
+        while len(input_string) > 0:
+            buffer = self.lexeme(input_string)
+            input_string = input_string[len(buffer[1]):]
+            if buffer[0] != 'WS':
+                tokens.append(buffer[:2])
+        return tokens
 
+    def lexeme(self, input_string):
+        buffer = ''
+        buffer += input_string[0]
+        if len(self.matcher(buffer)) > 0:
+            while len(self.matcher(buffer)) > 0 and len(buffer) < len(input_string):
+                buffer += input_string[len(buffer)]
+            if len(buffer) > 1:
+                buffer = buffer[:len(buffer) - 1]
+            return max(self.matcher(buffer))
+        else:
+            raise Exception('Unknown symbol ' + buffer)
 
-def lexer(input_string):
-    buffer = ''
-    buffer += input_string[0]
-    if len(matcher(buffer)) > 0:
-        while len(matcher(buffer)) > 0 and len(buffer) < len(input_string):
-            buffer += input_string[len(buffer)]
-        if len(buffer) > 1:
-            buffer = buffer[:len(buffer) - 1]
-        return max(matcher(buffer))
-    else:
-        raise Exception('Unknown symbol ' + buffer)
-
-
-def matcher(buffer):
-    matches = []
-    for terminal in terminals:
-        match = re.fullmatch(terminal[1], buffer)
-        if match is not None:
-            matches.append((terminal[0], match.string, terminal[2]))
-    return matches
+    def matcher(self, buffer):
+        matches = []
+        for terminal in terminals:
+            match = re.fullmatch(terminal[1], buffer)
+            if match is not None:
+                matches.append((terminal[0], match.string, terminal[2]))
+        return matches

@@ -49,3 +49,22 @@ if (b<100) {
         }
     }
 }
+
+RPN
+lang ГОТОВО
+expr ГОТОВО
+
+if_expr ГОТОВО
+
+
+logical_expression ГОТОВО
+
+
+while_expr
+
+
+do_while_expr
+
+
+assign_expr ГОТОВО
+
