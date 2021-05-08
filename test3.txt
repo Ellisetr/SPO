@@ -1,0 +1,7 @@
+a = 0
+b = 1
+a = a + 3
+while (a > 0) {
+        b = b * a - a/b
+        if (a > 4) { a = a - 2} else { a = a - 1 b = a + b}
+    }

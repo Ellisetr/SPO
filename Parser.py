@@ -58,7 +58,7 @@ class Parser:
     def startParser(self):
         self.root = self.lang()
         AST(self.root, 0)
-        self.printTokens(self.root, 0)
+        # self.printTokens(self.root, 0)
 
     def getTokens(self):
         return self.token_list

@@ -4,14 +4,13 @@ import re
 import Parser
 
 op = (
-    ['if', 0, '', ''],
-    ['while', 0, '', ''],
+    ['if', 0],
+    ['while', 0],
     ['(', 0],
     ['{', 0],
     [')', 1],
     ['{', 1],
     ['else', 1],
-    ['then', 1],
     ['do', 1],
     ['=', 2],
     ['||', 2],
@@ -57,7 +56,6 @@ class RPN:
         self.mi = 1
         self.tree = Node('')
         self.tree = copy.deepcopy(tree)
-        # Parser.AST(tree, 0)
 
     # Начало создания RPN
     def start(self):
@@ -66,6 +64,9 @@ class RPN:
             for child in node.getNodes():
                 self.expr(child)
         print('STACK', self.stack, ' OUT:', self.out)
+
+    def getStack(self):
+        return self.out
 
     # RPN для expr
     def expr(self, node):
@@ -134,25 +135,46 @@ class RPN:
             self.out.append('M' + str(buff_mi+1))
             self.out.append('goto')
             self.out.append('M' + str(buff_mi) + ':')
-            self.assign_expr(generateTokenList(node.getNodes()[3], [])[1:][:-1])
+            for nodes1 in node.getNodes()[3].getNodes():
+                for nodes2 in nodes1.getNodes():
+                    self.expr(nodes2)
             self.out.append('M' + str(buff_mi+1) + ':')
         else:
             self.out.append('M' + str(buff_mi) + ':')
 
-
-        # print(token_buff)
-        None
-
     def while_expr(self, node):
-        None
+        self.tokens.pop(0)
+        buff_mi = copy.deepcopy(self.mi)
+        self.out.append('M' + str(buff_mi)+':')
+        self.assign_expr(generateTokenList(node.getNodes()[0].getNodes()[2], []))
+        self.out.append('M' + str(buff_mi+1))
+        self.out.append('false goto')
+        self.mi = self.mi + 2
+        for nodes1 in node.getNodes()[1].getNodes():
+            for nodes2 in nodes1.getNodes():
+                self.expr(nodes2)
+        self.out.append('M' + str(buff_mi))
+        self.out.append('goto')
+        self.out.append('M' + str(buff_mi+1)+':')
 
     def do_while_expr(self, node):
-        None
+        self.tokens.pop(0)
+        buff_mi = copy.deepcopy(self.mi)
+        self.out.append('M' + str(buff_mi) + ':')
+        self.mi = self.mi + 2
+        for nodes1 in node.getNodes()[1].getNodes()[0].getNodes():
+            for nodes2 in nodes1.getNodes():
+                self.expr(nodes2)
+        self.assign_expr(generateTokenList(node.getNodes()[1].getNodes()[3], []))
+        self.out.append('M' + str(buff_mi + 1))
+        self.out.append('false goto')
+        self.out.append('M' + str(buff_mi))
+        self.out.append('goto')
+        self.out.append('M' + str(buff_mi + 1) + ':')
 
 
 # Использование дерева токенов для отделения выражений в блоки
 def generateTokenList(tree, genTokenList):
-    tab = ''
     if isinstance(tree.getParam(), tuple):
         genTokenList.append(tree.getParam())
     if len(tree.getNodes()) == 1:

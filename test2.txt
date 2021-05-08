@@ -3,7 +3,8 @@ b = (a+1) * 2
 if (a<5) {
     x = x+1
     b = b+c
-    if (a>0) { a = a +1} else {c=c}
+    if (a>0) {a = a +1 * (2+1)}
+    else {c=c}
     }
     else {c = c + 1}
 if (b>b) {b=b}
