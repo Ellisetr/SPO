@@ -6,6 +6,7 @@ import Parser
 op = (
     ['if', 0],
     ['while', 0],
+    ['print',0],
     ['(', 0],
     ['{', 0],
     [')', 1],
@@ -59,11 +60,12 @@ class RPN:
 
     # Начало создания RPN
     def start(self):
+        print('RPN:')
         newtree = self.tree.getNodes()
         for node in newtree:
             for child in node.getNodes():
                 self.expr(child)
-        print('STACK', self.stack, ' OUT:', self.out)
+        print(self.out)
 
     def getStack(self):
         return self.out
@@ -78,13 +80,52 @@ class RPN:
             self.while_expr(node)
         elif node.getParam() == 'do_while_expr':
             self.do_while_expr(node)
+        elif node.getParam() == 'func':
+            self.func(node.getNodes()[0])
+
+    def func(self, node):
+        if node.getParam() == 'print_func':
+            self.print_func(generateTokenList(node, []))
+        elif node.getParam() == 'hashmap_init':
+            self.hashmap_init(generateTokenList(node, []))
+        elif node.getParam() == 'put_func':
+            self.put_func(generateTokenList(node, []))
+
+    def hashmap_init(self, token_buff):
+        self.stack.append(token_buff.pop(0)[1])
+        self.out.append(token_buff.pop(1)[1])
+        self.out.append(self.stack.pop(0))
+        self.stack.clear()
+
+    def put_func(self,token_buff):
+        self.stack.append(token_buff.pop(0)[1])
+        self.out.append(token_buff.pop(1)[1])
+        self.out.append(token_buff.pop(1)[1])
+        self.out.append(token_buff.pop(1)[1])
+        self.out.append(self.stack.pop(0))
+        self.stack.clear()
+
+    def get_func(self, token_buff):
+        self.stack.append(token_buff.pop(0)[1])
+        self.out.append(token_buff.pop(1)[1])
+        self.out.append(token_buff.pop(1)[1])
+        self.out.append(self.stack.pop(0))
+        self.stack.clear()
+
+    def print_func(self, token_buff):
+        self.stack.append([token_buff.pop(0)[1],1])
+        self.assign_expr(token_buff)
+        self.stack.clear()
 
     # RPN для логических и арифметических операций
     def assign_expr(self, token_buff):
+        # print(token_buff)
         while len(token_buff) > 0:
-            print('STACK', self.stack, ' OUT:', self.out)
+            # print('STACK', self.stack, ' OUT:', self.out)
 
             if token_buff[0][0] == 'VAR' or token_buff[0][0] == 'NUMBER':
+                if token_buff[0][0] == 'NUMBER':
+                    token_buff[0] = (token_buff[0][0], float(token_buff[0][1]))
                 self.out.append(token_buff.pop(0)[1])
 
             elif token_buff[0][0] == 'ASSIGN_OP' or token_buff[0][0] == 'OP' or token_buff[0][0] == 'LOGICAL_OP':

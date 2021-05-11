@@ -56,6 +56,7 @@ class Parser:
         self.root = ''
 
     def startParser(self):
+        print('AST:')
         self.root = self.lang()
         AST(self.root, 0)
         # self.printTokens(self.root, 0)
@@ -82,8 +83,68 @@ class Parser:
             node.addNode(self.while_expr())
         elif self.token_list[0][0] == 'do_KW':
             node.addNode(self.do_while_expr())
+        elif re.match('(print_KW)|(remove_KW)|(put_KW)|(clear_KW)|(hashmap_KW)',self.token_list[0][0]):
+            node.addNode(self.func())
         else:
             raise Exception
+        return node
+
+    def func(self):
+        node = Node('func')
+        if self.token_list[0][0] == 'print_KW':
+            node.addNode(self.print_expr())
+        elif self.token_list[0][0] == 'remove_KW':
+            node.addNode(self.remove())
+        elif self.token_list[0][0] == 'put_KW':
+            node.addNode(self.put())
+        elif self.token_list[0][0] == 'clear_KW':
+            node.addNode(self.clear())
+        elif self.token_list[0][0] == 'hashmap_KW':
+            node.addNode(self.hashmap_init())
+        else:
+            raise Exception
+        return node
+
+    def hashmap_init(self):
+        node = Node('hashmap_init')
+        node.addNode(self.match('hashmap_KW'))
+        node.addNode(self.match('L_BR'))
+        node.addNode(self.match('VAR'))
+        node.addNode(self.match('R_BR'))
+        return node
+
+    def remove(self):
+        node = Node('remove_func')
+        node.addNode(self.match('remove_KW'))
+        node.addNode(self.match('L_BR'))
+        node.addNode(self.value())
+        node.addNode(self.match('R_BR'))
+        return node
+
+    def put(self):
+        node = Node('put_func')
+        node.addNode(self.match('put_KW'))
+        node.addNode(self.match('L_BR'))
+        node.addNode(self.value())
+        node.addNode(self.value())
+        node.addNode(self.value())
+        node.addNode(self.match('R_BR'))
+        return node
+
+    def clear(self):
+        node = Node('clear_func')
+        node.addNode(self.match('clear_KW'))
+        node.addNode(self.match('L_BR'))
+        node.addNode(self.match('VAR'))
+        node.addNode(self.match('R_BR'))
+        return node
+
+    def print_expr(self):
+        node = Node('print_func')
+        node.addNode(self.match('print_KW'))
+        node.addNode(self.match('L_BR'))
+        node.addNode(self.value_expr())
+        node.addNode(self.match('R_BR'))
         return node
 
     # IF_EXPR
@@ -158,8 +219,16 @@ class Parser:
             node.addNode(self.value_expr())
         except Exception:
             None
+
+        try:
+            node.addNode(self.match('OP'))
+            node.addNode(self.value_expr())
+        except Exception:
+            None
+
         if err == 'Error Found':
             raise Exception('Error')
+
         return node
 
     def value_expr_brackets(self):
@@ -173,8 +242,9 @@ class Parser:
     def logical_expr(self):
         node = Node('logical_expr')
         node.addNode(self.value())
-        node.addNode(self.match('LOGICAL_OP'))
-        node.addNode(self.value())
+        while re.match('LOGICAL_OP', self.token_list[0][0]):
+            node.addNode(self.match('LOGICAL_OP'))
+            node.addNode(self.value())
         return node
 
     # DO_WHILE_EXPR
@@ -229,6 +299,7 @@ class Parser:
                 self.printTokens(l, level + 1)
         # AST PRINT
 
+
 def AST(tree, level):
     tab = ''
     for i in range(level):
@@ -237,5 +308,3 @@ def AST(tree, level):
 
     for leaf in tree.getNodes():
         AST(leaf, level + 1)
-
-

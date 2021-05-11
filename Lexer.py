@@ -6,8 +6,8 @@ terminals = \
         ('else_KW', '^(else)$', 1),
         ('while_KW', '^(while)$', 1),
         ('do_KW', '^(do)$', 1),
-        ('VAR', '^[a-zA-Z]{1}[a-zA-Z_0-9]{0,}$', 0),
-        ('NUMBER', '^0|[1-9][0-9]*$', 0),
+        ('VAR', '^-?[a-zA-Z]{1}[a-zA-Z_0-9]{0,}$', 0),
+        ('NUMBER', '^0|-?[1-9][0-9]*$', 0),
         ('ASSIGN_OP', '^=$', 0),
         ('OP', '^(\+|\-|\*|\/)$', 0),
         ('L_BR', '^\($', 0),
@@ -15,17 +15,28 @@ terminals = \
         ('L_S_BR', '^{$', 0),
         ('R_S_BR', '^}$', 0),
         ('WS', ' ', 0),
-        ('LOGICAL_OP', '^((and)|(or)|(xor)|(nor)|(==)|(!=)|(>)|(>=)|(<)|(<=))$', 0)
+        ('LOGICAL_OP', '^((&)|(||)|(xor)|(nor)|(==)|(!=)|(>)|(>=)|(<)|(<=))$', 0),
+        ('print_KW', '^(print)$', 1),
+        ('remove_KW', '^(remove)$', 1),
+        ('put_KW', '^(put)$', 1),
+        ('clear_KW', '^(clear)$', 1),
+        ('size_KW', '^(size)$', 1),
+        ('get_KW', '^(get)$', 1),
+        ('is_empty_KW', '^(isEmpty)$', 1),
+        ('contains_KW', '^(clear)$', 1),
+        ('hashmap_KW', '^(hashMap)$', 1),
     ]
 
 
 class Lexer:
     def __init__(self, file):
+        print('Input file:')
         print(open(file).read())
         self.data = open(file).read().replace('\n', ' ')
         self.tokens = [[], []]
 
     def startLexer(self):
+        print('Lexer:')
         tokens = self.nextLexeme(self.data)
         print(tokens)
         return tokens
