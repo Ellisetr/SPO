@@ -8,3 +8,6 @@ if (a<5) {
     }
     else {c = c + 1}
 if (b>b) {b=b}
+print(a)
+print(b)
+print(c)

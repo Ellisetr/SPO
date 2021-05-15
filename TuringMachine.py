@@ -1,23 +1,29 @@
+import CustomData.hashMap
+import CustomData.doubleLinkedList
+
 op_count = (
-    ['print', 1],
-    ['put', 3],
-    ['hashMap', 1],
-    ['=', 2],
-    ['||', 2],
-    ['&', 2],
-    ['~', 2],
-    ['<', 2],
-    ['>', 2],
-    ['==', 2],
-    ['<=', 2],
-    ['>=', 2],
-    ['!=', 2],
-    ['+', 2],
-    ['-', 2],
-    ['*', 2],
-    ['/', 2],
-    ['goto', 1],
-    ['false goto', 1]
+    ['doubleLinkedList'],
+    ['get'],
+    ['remove'],
+    ['print'],
+    ['put'],
+    ['hashMap'],
+    ['='],
+    ['||'],
+    ['&'],
+    ['~'],
+    ['<'],
+    ['>'],
+    ['=='],
+    ['<='],
+    ['>='],
+    ['!='],
+    ['+'],
+    ['-'],
+    ['*'],
+    ['/'],
+    ['goto'],
+    ['false goto']
 )
 
 
@@ -26,8 +32,7 @@ class Turing:
         self.input_stack = input_stack
         self.iterator = 0
         self.stack = []
-        self.memory = []
-        self.hashMapMemory = []
+        self.memory = {}
         self.op_buff = []
 
     def start(self):
@@ -38,8 +43,8 @@ class Turing:
             else:
                 self.stack.append(self.input_stack[self.iterator])
             self.iterator = self.iterator + 1
-        print(self.hashMapMemory)
-
+        # print(self.memory)
+        # print(self.hashMapIsEmpty('a'))
         None
 
     def isOperand(self, operand):
@@ -54,7 +59,7 @@ class Turing:
 
     def calculate(self):
         if self.op_buff[0] == '=':
-            self.memory_change(self.stack.pop(-1), self.stack.pop(-1))
+            self.add_var(self.stack.pop(-1), self.stack.pop(-1))
         if self.op_buff[0] == '+':
             self.add(self.stack.pop(-1), self.stack.pop(-1))
         if self.op_buff[0] == '*':
@@ -87,40 +92,34 @@ class Turing:
             self.print(self.stack.pop(-1))
         if self.op_buff[0] == 'hashMap':
             self.hashMap(self.stack.pop(-1))
+        if self.op_buff[0] == 'doubleLinkedList':
+            self.doubleLinkedList(self.stack.pop(-1))
         if self.op_buff[0] == 'put':
-            self.hashMapPut(self.stack.pop(-1), self.stack.pop(-1), self.stack.pop(-1))
+            if self.get_type(self.stack[-3]) == 'hashMap':
+                self.hashMapPut(self.stack.pop(-1), self.stack.pop(-1), self.stack.pop(-1))
+            elif self.get_type(self.stack[-3]) == 'doubleLinkedList':
+                self.doubleLinkedListPut(self.stack.pop(-1), self.stack.pop(-1), self.stack.pop(-1))
+        if self.op_buff[0] == 'get':
+            if self.get_type(self.stack[-2]) == 'hashMap':
+                self.hashMapGet(self.stack.pop(-1), self.stack.pop(-1))
+            elif self.get_type(self.stack[-2]) == 'doubleLinkedList':
+                self.doubleLinkedListGet(self.stack.pop(-1), self.stack.pop(-1))
+        if self.op_buff[0] == 'remove':
+            if self.get_type(self.stack[-2]) == 'hashMap':
+                self.hashMapRemove(self.stack.pop(-1), self.stack.pop(-1))
+            elif self.get_type(self.stack[-2]) == 'doubleLinkedList':
+                self.doubleLinkedListRemove(self.stack.pop(-1), self.stack.pop(-1))
+
         None
 
-    def hashMap(self, var):
-        if self.hashMapKeyIndex(var) != -1:
-            self.hashMapMemory.remove(var)
-        self.hashMapMemory.append([var, {}])
-
-    def hashMapPut(self, value, key, var):
-        self.hashMapMemory[self.hashMapKeyIndex(var)][1].update({key: value})
-
-    def hashMapGet(self, var, key):
-        print(self.hashMapMemory[self.hashMapKeyIndex(var)][1].get(key))
-
-    def hashMapKeyIndex(self, var):
-        counter = 0
-        for varhash in self.hashMapMemory:
-            if varhash[0] == var:
-                return counter
-            counter = counter + 1
-        return -1
-
-    def hashMapClear(self, var):
-        self.hashMapMemory[self.hashMapKeyIndex(var)][1].clear()
-
-    def check_type(self, var):
-        if self.hashMapMemory[self.hashMapKeyIndex(var)] == -1:
-            return 'hashmap'
-        elif self.get_var(var):
-            return 'var'
+    def get_type(self, var):
+        if isinstance(self.memory[var], CustomData.hashMap.HashTable) is True:
+            return 'hashMap'
+        elif isinstance(self.memory[var], CustomData.doubleLinkedList.DoubleLL) is True:
+            return 'doubleLinkedList'
 
     def print(self, value):
-        ret_value = self.get_var(value)
+        ret_value = self.convert_to_float(value)
         if ret_value is not None:
             print(ret_value)
         else:
@@ -177,25 +176,48 @@ class Turing:
     def or_ex(self, op2, op1):
         self.stack.append(op1 or op2)
 
-    def memory_change(self, value, var):
+    def add_var(self, value, var):
         value = self.convert_to_float(value)
-        for stored_var, stored_value in self.memory:
-            if stored_var == var:
-                self.memory.remove([stored_var, stored_value])
-        self.memory.append([var, value])
+        self.memory[var] = value
 
     def get_var(self, var):
         buff = None
-        for stored_var, stored_value in self.memory:
+        for stored_var, stored_value in self.memory.items():
             if stored_var == var:
                 buff = stored_value
         return buff
 
     def convert_to_float(self, op):
-        if isinstance(op, str):
-            for var, value in self.memory:
+        if op in self.memory:
+            return self.memory.get(op)
+        elif isinstance(op, str):
+            for var, value in self.memory.items():
                 if op == var:
                     op = value
                 elif op == '-' + var:
                     op = -value
         return float(op)
+
+    def doubleLinkedList(self, var):
+        self.memory[var] = CustomData.doubleLinkedList.DoubleLL()
+
+    def doubleLinkedListPut(self, value, key, var):
+        self.memory[var].insert(key, CustomData.doubleLinkedList.DllNode(value))
+
+    def doubleLinkedListGet(self, value, var):
+        self.stack.append(self.memory[var].get(value))
+
+    def doubleLinkedListRemove(self, value, var):
+        self.memory[var].delete(value)
+
+    def hashMap(self, var):
+        self.memory[var] = CustomData.hashMap.HashTable()
+
+    def hashMapPut(self, value, key, var):
+        self.memory[var].set_val(key, value)
+
+    def hashMapGet(self, key, var):
+        self.stack.append(self.memory[var].get_val(key))
+
+    def hashMapRemove(self, key, var):
+        self.memory[var].delete_val(key)

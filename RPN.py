@@ -1,12 +1,9 @@
 import copy
 import re
 
-import Parser
-
 op = (
     ['if', 0],
     ['while', 0],
-    ['print',0],
     ['(', 0],
     ['{', 0],
     [')', 1],
@@ -88,8 +85,12 @@ class RPN:
             self.print_func(generateTokenList(node, []))
         elif node.getParam() == 'hashmap_init':
             self.hashmap_init(generateTokenList(node, []))
+        elif node.getParam() == 'doubleLinkedList_init':
+            self.doublelinkedlist_init(generateTokenList(node, []))
         elif node.getParam() == 'put_func':
             self.put_func(generateTokenList(node, []))
+        elif node.getParam() == 'remove_func':
+            self.remove_func(generateTokenList(node, []))
 
     def hashmap_init(self, token_buff):
         self.stack.append(token_buff.pop(0)[1])
@@ -97,24 +98,30 @@ class RPN:
         self.out.append(self.stack.pop(0))
         self.stack.clear()
 
-    def put_func(self,token_buff):
+    def doublelinkedlist_init(self, token_buff):
         self.stack.append(token_buff.pop(0)[1])
-        self.out.append(token_buff.pop(1)[1])
-        self.out.append(token_buff.pop(1)[1])
         self.out.append(token_buff.pop(1)[1])
         self.out.append(self.stack.pop(0))
         self.stack.clear()
 
-    def get_func(self, token_buff):
+    def put_func(self, token_buff):
         self.stack.append(token_buff.pop(0)[1])
+        self.out.append(token_buff.pop(1)[1])
         self.out.append(token_buff.pop(1)[1])
         self.out.append(token_buff.pop(1)[1])
         self.out.append(self.stack.pop(0))
         self.stack.clear()
 
     def print_func(self, token_buff):
-        self.stack.append([token_buff.pop(0)[1],1])
+        self.stack.append([token_buff.pop(0)[1], 1])
         self.assign_expr(token_buff)
+        self.stack.clear()
+
+    def remove_func(self, token_buff):
+        self.stack.append(token_buff.pop(0)[1])
+        self.out.append(token_buff.pop(1)[1])
+        self.out.append(token_buff.pop(1)[1])
+        self.out.append(self.stack.pop(0))
         self.stack.clear()
 
     # RPN для логических и арифметических операций
@@ -157,7 +164,13 @@ class RPN:
                     self.out.append(self.stack.pop(-1)[0])
                 if self.stack[-1][0] == '(':
                     self.stack.pop(-1)
-
+            elif token_buff[0][1] == 'get':
+                self.stack.append([token_buff.pop(0)[1], 1])
+                token_buff.pop(0)
+                self.out.append(token_buff.pop(0)[1])
+                self.out.append(token_buff.pop(0)[1])
+                token_buff.pop(0)
+                self.out.append(self.stack.pop(-1)[0])
         while len(self.stack) > 0:
             self.out.append(self.stack.pop(-1)[0])
 
@@ -173,22 +186,22 @@ class RPN:
             for nodes2 in nodes1.getNodes():
                 self.expr(nodes2)
         if len(node.getNodes()) > 2:
-            self.out.append('M' + str(buff_mi+1))
+            self.out.append('M' + str(buff_mi + 1))
             self.out.append('goto')
             self.out.append('M' + str(buff_mi) + ':')
             for nodes1 in node.getNodes()[3].getNodes():
                 for nodes2 in nodes1.getNodes():
                     self.expr(nodes2)
-            self.out.append('M' + str(buff_mi+1) + ':')
+            self.out.append('M' + str(buff_mi + 1) + ':')
         else:
             self.out.append('M' + str(buff_mi) + ':')
 
     def while_expr(self, node):
         self.tokens.pop(0)
         buff_mi = copy.deepcopy(self.mi)
-        self.out.append('M' + str(buff_mi)+':')
+        self.out.append('M' + str(buff_mi) + ':')
         self.assign_expr(generateTokenList(node.getNodes()[0].getNodes()[2], []))
-        self.out.append('M' + str(buff_mi+1))
+        self.out.append('M' + str(buff_mi + 1))
         self.out.append('false goto')
         self.mi = self.mi + 2
         for nodes1 in node.getNodes()[1].getNodes():
@@ -196,7 +209,7 @@ class RPN:
                 self.expr(nodes2)
         self.out.append('M' + str(buff_mi))
         self.out.append('goto')
-        self.out.append('M' + str(buff_mi+1)+':')
+        self.out.append('M' + str(buff_mi + 1) + ':')
 
     def do_while_expr(self, node):
         self.tokens.pop(0)

@@ -1,8 +1,8 @@
 import Lexer
+import TuringMachine
 import Parser
 import RPN
-import RPN
-import TuringMachine
+
 # This is a sample Python script.
 
 # Press Shift+F10 to execute it or replace it with your code.
@@ -10,7 +10,7 @@ import TuringMachine
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    Lexer = Lexer.Lexer('test5.txt')
+    Lexer = Lexer.Lexer('hashmap_doublell_test.txt')
     tokens = Lexer.startLexer()
 
     Parser = Parser.Parser(tokens)

@@ -23,8 +23,9 @@ terminals = \
         ('size_KW', '^(size)$', 1),
         ('get_KW', '^(get)$', 1),
         ('is_empty_KW', '^(isEmpty)$', 1),
-        ('contains_KW', '^(clear)$', 1),
+        ('clear_KW', '^(clear)$', 1),
         ('hashmap_KW', '^(hashMap)$', 1),
+        ('doubleLinkedList_KW', '^(doubleLinkedList)$', 1)
     ]
 
 

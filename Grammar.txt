@@ -24,20 +24,12 @@ hashmap_return -> size | is_empty | contains
 //func
 hashmap_init -> hashmap_KW L_BR VAR R_BR
 double_linked_list_init -> double_linked_list_KW L_BR VAR R_BR
-print -> print_KW L_BR (value) R_BR
+print -> print_KW L_BR value_expr R_BR
 
-//hashmap
+//hashmap and DLL
 remove -> remove_KW L_BR value value R_BR
 put -> put_KW L_BR value value value R_BR
-clear -> clear_KW L_BR value R_BR
-
-size -> size_KW L_BR value R_BR
-get -> get_KW L_BR value R_BR
-is_empty -> is_empty_KW L_BR value R_BR
-contains -> contains_KW L_BR value value R_BR
-
-//doublell
-
+get_func -> get_KW L_BR value R_BR
 
 value -> NUMBER | VAR | get_func
 

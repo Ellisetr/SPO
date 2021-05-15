@@ -1,7 +1,5 @@
 import copy
 import re
-import Lexer
-
 """""""""
 lang -> expr+
 expr -> assign_expr | if_expr | while_expr | do_while_expr
@@ -83,7 +81,7 @@ class Parser:
             node.addNode(self.while_expr())
         elif self.token_list[0][0] == 'do_KW':
             node.addNode(self.do_while_expr())
-        elif re.match('(print_KW)|(remove_KW)|(put_KW)|(clear_KW)|(hashmap_KW)',self.token_list[0][0]):
+        elif re.match('(print_KW)|(remove_KW)|(put_KW)|(clear_KW)|(hashmap_KW)|(doubleLinkedList_KW)',self.token_list[0][0]):
             node.addNode(self.func())
         else:
             raise Exception
@@ -101,8 +99,18 @@ class Parser:
             node.addNode(self.clear())
         elif self.token_list[0][0] == 'hashmap_KW':
             node.addNode(self.hashmap_init())
+        elif self.token_list[0][0] == 'doubleLinkedList_KW':
+            node.addNode(self.doublelinkedlist_init())
         else:
             raise Exception
+        return node
+
+    def doublelinkedlist_init(self):
+        node = Node('doubleLinkedList_init')
+        node.addNode(self.match('doubleLinkedList_KW'))
+        node.addNode(self.match('L_BR'))
+        node.addNode(self.match('VAR'))
+        node.addNode(self.match('R_BR'))
         return node
 
     def hashmap_init(self):
@@ -118,6 +126,7 @@ class Parser:
         node.addNode(self.match('remove_KW'))
         node.addNode(self.match('L_BR'))
         node.addNode(self.value())
+        node.addNode(self.value())
         node.addNode(self.match('R_BR'))
         return node
 
@@ -128,14 +137,6 @@ class Parser:
         node.addNode(self.value())
         node.addNode(self.value())
         node.addNode(self.value())
-        node.addNode(self.match('R_BR'))
-        return node
-
-    def clear(self):
-        node = Node('clear_func')
-        node.addNode(self.match('clear_KW'))
-        node.addNode(self.match('L_BR'))
-        node.addNode(self.match('VAR'))
         node.addNode(self.match('R_BR'))
         return node
 
@@ -272,14 +273,26 @@ class Parser:
         elif self.token_list[0][0] == 'VAR':
             node.addNode(self.match('VAR'))
             return node
+        elif self.token_list[0][0] == 'get_KW':
+            node.addNode(self.get_func())
+            return node
         else:
             raise Exception('Unknown symbol' + self.token_list[0][0])
+
+    def get_func(self):
+        node = Node('get_func')
+        node.addNode(self.match('get_KW'))
+        node.addNode(self.match('L_BR'))
+        node.addNode(self.value())
+        node.addNode(self.value())
+        node.addNode(self.match('R_BR'))
+        return node
 
     def body(self, KW):
         node = Node(KW)
         node.addNode(self.match('L_S_BR'))
         node.addNode(self.expr())
-        while re.match('(VAR)|(if_KW)|(while_KW)|(do_KW)', self.token_list[0][0]):
+        while re.match('(VAR)|(if_KW)|(while_KW)|(do_KW)|(print_KW)|(hashmap_KW)|(doublelinkedlist_KW)', self.token_list[0][0]):
             node.addNode(self.expr())
         node.addNode(self.match('R_S_BR'))
         return node

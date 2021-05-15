@@ -1,0 +1,21 @@
+hashMap(a)
+doubleLinkedList(b)
+
+put(a hello 3)
+put(a world 228)
+print(a)
+remove(a world)
+print(a)
+
+print(get(a hello) * get(a hello))
+
+put(b 0 1)
+put(b 1 55)
+put(b 2 66)
+put(b 0 46)
+print(b)
+remove(b 1)
+print(5/4)
+
+print(a)
+print(b)
