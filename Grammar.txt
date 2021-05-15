@@ -12,14 +12,8 @@ R_S_BR -> }
 L_BR -> (
 R_BR -> )
 
-
 lang -> expr+
 expr -> assign_expr | if_expr | while_expr | do_while_expr | func
-
-hashmap_func -> remove | put | clear
-hashmap_return -> size | is_empty | contains
-
-
 
 //func
 hashmap_init -> hashmap_KW L_BR VAR R_BR
