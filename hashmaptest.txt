@@ -3,7 +3,7 @@ b = 12
 do {b = b/2  a = a + 1} while (a > 12 & b > 4)
 
 print(a)
-print(a*2+b+3)
+print(a*2+b+3/4)
 
 hashMap(a)
 hashMap(b)

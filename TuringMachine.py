@@ -1,4 +1,4 @@
-import CustomData.hashMap
+import CustomData.hashTable
 import CustomData.doubleLinkedList
 
 op_count = (
@@ -36,15 +36,15 @@ class Turing:
         self.op_buff = []
 
     def start(self):
-        print('Turing machine: ')
+        print('Console output: ')
         while self.iterator < len(self.input_stack):
             if self.isOperand(self.input_stack[self.iterator]):
                 self.calculate()
             else:
                 self.stack.append(self.input_stack[self.iterator])
             self.iterator = self.iterator + 1
-        # print(self.memory)
-        # print(self.hashMapIsEmpty('a'))
+        print('Var memory:')
+        print(self.memory)
         None
 
     def isOperand(self, operand):
@@ -113,13 +113,13 @@ class Turing:
         None
 
     def get_type(self, var):
-        if isinstance(self.memory[var], CustomData.hashMap.HashTable) is True:
+        if isinstance(self.memory[var], CustomData.hashTable.HashTable) is True:
             return 'hashMap'
         elif isinstance(self.memory[var], CustomData.doubleLinkedList.DoubleLL) is True:
             return 'doubleLinkedList'
 
     def print(self, value):
-        ret_value = self.convert_to_float(value)
+        ret_value = self.convert(value)
         if ret_value is not None:
             print(ret_value)
         else:
@@ -141,34 +141,34 @@ class Turing:
                     self.iterator = counter
 
     def divide(self, op2, op1):
-        self.stack.append(self.convert_to_float(op1) / self.convert_to_float(op2))
+        self.stack.append(self.convert(op1) / self.convert(op2))
 
     def add(self, op2, op1):
-        self.stack.append(self.convert_to_float(op1) + self.convert_to_float(op2))
+        self.stack.append(self.convert(op1) + self.convert(op2))
 
     def minus(self, op2, op1):
-        self.stack.append(self.convert_to_float(op1) - self.convert_to_float(op2))
+        self.stack.append(self.convert(op1) - self.convert(op2))
 
     def multiply(self, op2, op1):
-        self.stack.append(self.convert_to_float(op1) * self.convert_to_float(op2))
+        self.stack.append(self.convert(op1) * self.convert(op2))
 
     def greater(self, op2, op1):
-        self.stack.append(self.convert_to_float(op1) > self.convert_to_float(op2))
+        self.stack.append(self.convert(op1) > self.convert(op2))
 
     def greater_equals(self, op2, op1):
-        self.stack.append(self.convert_to_float(op1) >= self.convert_to_float(op2))
+        self.stack.append(self.convert(op1) >= self.convert(op2))
 
     def less_equals(self, op2, op1):
-        self.stack.append(self.convert_to_float(op1) <= self.convert_to_float(op2))
+        self.stack.append(self.convert(op1) <= self.convert(op2))
 
     def equals(self, op2, op1):
-        self.stack.append(self.convert_to_float(op1) == self.convert_to_float(op2))
+        self.stack.append(self.convert(op1) == self.convert(op2))
 
     def not_equals(self, op2, op1):
-        self.stack.append(self.convert_to_float(op1) != self.convert_to_float(op2))
+        self.stack.append(self.convert(op1) != self.convert(op2))
 
     def less(self, op2, op1):
-        self.stack.append(self.convert_to_float(op1) < self.convert_to_float(op2))
+        self.stack.append(self.convert(op1) < self.convert(op2))
 
     def and_ex(self, op2, op1):
         self.stack.append(op1 and op2)
@@ -177,25 +177,22 @@ class Turing:
         self.stack.append(op1 or op2)
 
     def add_var(self, value, var):
-        value = self.convert_to_float(value)
+        value = self.convert(value)
         self.memory[var] = value
 
-    def get_var(self, var):
-        buff = None
-        for stored_var, stored_value in self.memory.items():
-            if stored_var == var:
-                buff = stored_value
-        return buff
-
-    def convert_to_float(self, op):
+    def convert(self, op):
         if op in self.memory:
             return self.memory.get(op)
         elif isinstance(op, str):
             for var, value in self.memory.items():
                 if op == var:
                     op = value
+                    return float(op)
                 elif op == '-' + var:
                     op = -value
+                    return float(op)
+                else:
+                    return None
         return float(op)
 
     def doubleLinkedList(self, var):
@@ -208,16 +205,21 @@ class Turing:
         self.stack.append(self.memory[var].get(value))
 
     def doubleLinkedListRemove(self, value, var):
-        self.memory[var].delete(value)
+        if self.memory[var].delete(value) is False:
+            raise Exception("Key not found")
 
     def hashMap(self, var):
-        self.memory[var] = CustomData.hashMap.HashTable()
+        self.memory[var] = CustomData.hashTable.HashTable()
 
     def hashMapPut(self, value, key, var):
         self.memory[var].set_val(key, value)
 
     def hashMapGet(self, key, var):
-        self.stack.append(self.memory[var].get_val(key))
+        if self.memory[var].get_val(key) is False:
+            raise Exception("Key not found")
+        else:
+            self.stack.append(self.memory[var].get_val(key))
 
     def hashMapRemove(self, key, var):
-        self.memory[var].delete_val(key)
+        if self.memory[var].delete_val(key) is False:
+            raise Exception("Key not found")

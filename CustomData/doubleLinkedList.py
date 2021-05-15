@@ -100,10 +100,4 @@ class DoubleLL:
         while tmp is not None:
             tmp_str.append(tmp.data)
             tmp = tmp.next
-            """if elem.prev:
-                print('-----Previous data-----')
-                print(elem.prev.data)
-            if elem.next:
-                print('-----Next Data-----')
-                print(elem.next.data)"""
         return str(tmp_str)

@@ -3,11 +3,12 @@ doubleLinkedList(b)
 
 put(a hello 3)
 put(a world 228)
+put(a lol 223)
 print(a)
 remove(a world)
 print(a)
 
-print(get(a hello) * get(a hello))
+print(get(a hello))
 
 put(b 0 1)
 put(b 1 55)

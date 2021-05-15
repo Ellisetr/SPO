@@ -8,6 +8,7 @@ class HashTable:
 
     def clear(self):
         self.hash_table.clear()
+        self.hash_table.append([])
 
     def set_val(self, key, val):
         hashed_key = hash(key) % self.size
@@ -35,7 +36,10 @@ class HashTable:
         if found_key:
             return record_val
         else:
-            return "No record found"
+            return False
+
+    def contains(self, key):
+        None
 
     # Remove a value with specific key
     def delete_val(self, key):
@@ -49,7 +53,7 @@ class HashTable:
                 break
         if found_key:
             bucket.pop(index)
-        return
+        return found_key
 
     def __str__(self):
         return "".join(str(item) for item in self.hash_table)
