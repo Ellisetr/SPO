@@ -11,6 +11,13 @@ L_S_BR -> {
 R_S_BR -> }
 L_BR -> (
 R_BR -> )
+WS -> ' '
+print_KW -> print
+remove_KW -> remove
+put_KW -> put
+get_KW -> get
+hashmap_KW -> hashMap
+doubleLinkedList_KW -> doubleLinkedList
 
 lang -> expr+
 expr -> assign_expr | if_expr | while_expr | do_while_expr | func

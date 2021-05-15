@@ -2,9 +2,19 @@ import copy
 import re
 """""""""
 lang -> expr+
-expr -> assign_expr | if_expr | while_expr | do_while_expr
+expr -> assign_expr | if_expr | while_expr | do_while_expr | func
 
-value -> NUMBER | VAR
+//func
+hashmap_init -> hashmap_KW L_BR VAR R_BR
+double_linked_list_init -> double_linked_list_KW L_BR VAR R_BR
+print -> print_KW L_BR value_expr R_BR
+
+//hashmap and DLL
+remove -> remove_KW L_BR value value R_BR
+put -> put_KW L_BR value value value R_BR
+get_func -> get_KW L_BR value R_BR
+
+value -> NUMBER | VAR | get_func
 
 if_expr -> if_head if_body (else_KW body)?
 if_head -> if_KW if_condition
@@ -12,7 +22,6 @@ if_condition -> L_BR logical_expression R_RB
 if_body -> L_S_BR expr+ R_S_BR
 
 logical_expression -> value (LOGICAL_OP value)*
-
 
 while_expr -> while_head while_body
 while_head -> while_KW logical_expression
@@ -22,7 +31,6 @@ do_while_expr -> do_KW do_while_body
 do_while_body -> while_body while_kw logical_expression
 
 assign_expr -> VAR ASSIGN_OP value_expr*
-
 
 value_expr -> (value_expr_brackets | value) (OP value_expr)?
 value_expr_brackets -> L_BR value_expr R_BR
